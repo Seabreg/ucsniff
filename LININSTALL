@@ -1,0 +1,104 @@
+DEPENDENCIES
+
+IMPORTANT NOTE:  UCSniff 3.20 has been developed and tested on the 32-bit version of the Ubuntu 12.04.  These instructions also work for Mint Linux 13, but we have not test UCSniff on Mint Linux 13 at this time.  We currently can't support it with 64-bit versions of Linux.
+
+Basic Dependencies (Ubuntu 12.04, Mint Linux 13)
+First, make sure you get the basic dependencies.  These are a list of dependencies for Ubuntu 12.04.  Please note that we have done extensive testing on this version of Ubuntu and can't guarantee on other versions of Linux just yet.
+
+apt-get update
+apt-get install build-essential
+apt-get install zlib1g-dev liblzo-dev
+apt-get install libpcap0.8-dev libnet1-dev
+apt-get install libasound2-dev
+apt-get install libbz2-dev
+
+GUI Dependencies:
+apt-get install libx11-dev
+apt-get install libxext-dev
+apt-get install libfreetype6-dev
+
+Realtime Video Monitor Dependencies: 
+Note:  The minimum version required for vlc and libvlc-dev is at least 2.0.1 or later.
+apt-get install vlc
+apt-get install libvlc-dev
+
+A/V Muxing Dependencies:
+apt-get install libavformat-dev (this should also install libavutil-dev and libavcodec-dev)
+apt-get install libavdevice-dev
+apt-get install libswscale-dev
+apt-get install libavfilter-dev
+apt-get install libx264-dev
+apt-get install libav-tools
+
+Optional A/V Player/Muxing tools:
+apt-get install mplayer
+apt-get instll mencoder
+
+Remove the pulse audio debian package, if previously installed:
+apt-get remove pulseaudio
+
+INSTALL FROM SOURCE
+
+Default UCSniff Installation
+UCSniff compiles and runs well on Ubuntu 12.04. The following steps show a simple installation of UCSniff for VoIP and Video-only sniffing:
+
+tar -zxvf ucsniff-xxx.tar.gz
+cd ucsniff-xxx
+./configure
+make
+make install
+
+Features supported:
+* Audio Eavesdropping
+* Video Eavesdropping (creates h264 format file)
+* Creates an avi file and muxes audio and video
+* Creates a wav file and muxes both forward and reverse audio
+* Realtime Audio Monitor (UCSniff ALSA support)
+
+UCSniff with GUI and Realtime Monitor (Recommended)
+Note:  The configure script option of '--enable-libvlc' enables the realtime video monitor capability in UCSniff.
+
+Dependency packages for video realtime monitor:
+apt-get install vlc
+apt-get install libvlc-dev
+
+./configure --enable-gui --enable-libvlc
+make
+make install
+
+Features supported:
+* Audio Eavesdropping
+* Video Eavesdropping (Creates h264 format file)
+* Realtime Audio Monitor (UCSniff ALSA support)
+* GUI Support
+* Realtime Video Monitor
+* Creates an avi file and muxes audio and video
+* Creates a wav file and muxes both forward and reverse audio
+
+libav-tools (was FFmpeg) vs. libvlc (Video support differences)
+libav-tools:
+* Creates video output files in AVI container
+* Muxes audio and video, so that AVI files can play audio
+* Does not support Realtime Video Monitor
+
+libvlc:
+* Creates video files as .h264 files, which plays in media players like VLC
+* Doesn't mux audio and video for the created .h264 video files
+* Supports Realtime Video Monitor
+
+Installation with GUI
+./configure --enable-gui
+make
+make install
+
+Features supported:
+* Audio Eavesdropping
+* Video Eavesdropping (creates h264 format file)
+* Realtime Audio Monitor (UCSniff ALSA support)
+* GUI Support
+* Creates an avi file and muxes audio and video
+* Creates a wav file and muxes both forward and reverse audio
+
+UNDEFINED REFERENCE WITH NCURSES:  If you are facing compilation errors saying "undefined reference" to ncurses.h, uninstalling libncurses5-dev debian package followed by recompiling UCSniff should resolve the issue:
+
+apt-get remove libncurses5-dev

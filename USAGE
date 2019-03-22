@@ -1,0 +1,240 @@
+The objective of this file, USAGE, is to help understand how UCSniff works, and how it can be used.
+
+FIRST
+
+
+Before running UCSniff, make sure you do the following:
+
+    * Read this entire file
+    * Understand what you are testing
+    * Understand where you are testing from
+    * Make sure you have permission to run UCSniff on the network
+    * Understand that running a security tool like UCSniff could potentially result in a DoS condition, for many reasons
+    * Understand that the authors are not responsible for what happens when the tool runs
+    * When you are finished running UCSniff in MitM Mode, remember to hit 'q'. This re-ARPs the victim IP Phones. Failure to do so can result in a Dos.
+
+GUI USAGE
+To start UCSniff GUI:
+ucsniff -G
+
+This is the command line usage documentation for UCSniff. For more information on GUI usage, please see here. Some of the modes and options described below are still applicable to the GUI, so it would be a good idea to read below as well.
+http://ucsniff.sf.net/guiusage.html
+
+QUICK USAGE EXAMPLES
+
+To run UCSniff in Monitor Mode:
+ucsniff -i eth0 -M
+
+In CDP environment, to run UCSniff in MitM Learning Mode, to discover VVID, and VLAN Hop:
+ucsniff -i eth0 -c 1 // //
+
+If you know the VVID, to run UCSniff in MitM Target Mode to VLAN Hop to a specified Voice VLAN (200):
+ucsniff -i eth0 -v 200 -T
+
+In Target Mode, to run UCSniff to download the VoIP Corporate Directory and VLAN Hop within a CDP infrastructure:
+ucsniff -i eth0 -c 1 -a -m 00:00:00:00:00:00 -T
+
+In an environment that uses dedicated access ports for the IP Phones (No Voice VLANs), to use UCSniff in Learning Mode, with VoIP Corporate Directory:
+ucsniff -i eth0 -a -m 00:00:00:00:00:00 // //
+
+
+MODES & FEATURES
+
+UCSniff has two basic modes, and several features. The basic mode used (Monitor Versus MitM) depends on what your security goal is and where you are running the tool from. For example, what is the ethernet port configuration of the port you are trying to test? Are you trying to simulate what a regular user can or cannot do? Enabling the optional features for VLAN Hop and Corporate Directory integrate with MitM Mode (not Monitor Mode), and can be very effective in understanding the risk of regular users carrying out this attack.
+
+There are two basic modes for UCSniff:
+1. Monitor Mode
+2. Man-in-the-Middle (MitM) Mode
+
+When running MitM Mode, there are a couple of useful features that can be enabled:
+1. VLAN Hop
+2. VoIP Corporate Directory Download
+
+Then, there are two MitM Modes:
+1. Learning Mode
+2. Target Mode
+
+In MitM "Learning" Mode, users are mapped to a targets file. The idea is that once users are learned, you can run the tool in "Target" Mode to only attack specific users. Monitor Mode is another way of running "Learning" Mode. With Monitor Mode, UCSniff only passively listens for traffic.
+
+
+MONITOR MODE
+
+Monitor Mode is the traditional way that many run VoIP Sniffers. The irony is that beyond a Network Administrator using this feature, it really isn't accurate in a real attack scenario or in an authorized penetration test, if your goal is to demonstrate real risk. If you are a penetration tester, the client is never going to set up a SPAN Session for you so that you can monitor traffic, and users *probably* will not agree to moving their phone onto the attacker's Hub. Enterprises want to understand what regular users can do, and from where. However, Monitor Mode is the safest way to run the tool and, depending on your goals of using this tool, that can be very important.
+
+Example:
+ucsniff -i eth0 -M
+
+In Monitor Mode, the monitoring station running UCSniff shares a connection on a hub with the IP Phones. Or, the Network Administrator sets up a SPAN Session to monitor traffic. It's very important to note that with Monitor Mode, UCSniff depends on receiving both tx and rx signaling traffic for the call server. This applies to a Monitor SPAN Session that is used on a switch (not scenarios where UCSniff is used on a hub).
+
+In order for UCSniff to work properly in Monitor Mode with SPAN, you MUST set up the SPAN Session in the following way (Cisco Catalyst IOS example which assumes Voice VLAN 200 and the Monitor station is terminated into Fa0/2):
+
+!
+monitor session 1 source vlan 200 both
+monitor session 1 destination interface fa0/2
+!
+
+You must also make sure that the interface is up and has an IP address. If you are running a SPAN session to this destination port, DHCP will not work, so you can set your interface to any static IP address manually with 'ifconfig'.
+
+Wireshark can't re-create a bi-directional RTP media stream into a single file with "both" when both IP Phones are on the same VLAN because "both" will SPAN duplicate copies of the RTP packets, which will distort the media files created by Wireshark. On the other hand, if you set up your SPAN session to only do "rx" or "tx", the station will miss half of the signaling path. UCSniff depends on receiving "both". UCSniff automatically discards duplicate RTP packets, in order to create a single conversation file for both forward and reverse media directions.
+
+In Monitor Mode, UCSniff opens "targets.txt" in the working directory. If the file doesn't exist, it is created. If the file already exists, it parses the entries into memory. It then listens for signaling traffic and adds to / updates the target mappings. That is why Monitor Mode is a very safe way of running "Learning Mode." In Monitor Mode, UCSniff is never injecting spoofed ARP Packets, so it has zero risk of service interruption.
+
+There is one special monitor mode option worth mentioning. The '-U' or '--fromextension' parameter will listen on calls only from this particular extension that is indicated at the command line.
+
+
+MITM MODE
+
+In Man-in-the-Middle (MitM) Mode, UCSniff is ARP Poisoning the network, and silently intercepting all IP Phone traffic specified in Ettercap targets. Users calling each other will have no idea that UCSniff is intercepting the traffic. The calls operate as normal because UCSniff is forwarding the traffic between the phones. Injecting spoofed ARP packets into the network also carries an associated risk with it.
+
+You should ensure that you have permission from the network owner to run the tool in this mode, and understand that this mode always carries with it the risk of unintended consequences (Service interruption). If the tool crashes without re-ARPing the victims, this will result in a DoS condition on the IP Phone network.
+
+The most effective way to run MitM Mode to demonstrate UCSniff is to identify a physical ethernet port where an IP Phone is provisioned on the network. If you pick just any Ethernet port, the port may not necessarily be a member of the VLAN where the IP Phones can associate and provision into, as most organizations use "Voice VLANs" to segment IP Phones and easily provide QoS, and some Ethernet port configurations are not configured for Voice. Therefore, the easiest way to do this is to locate an IP Phone and replace the laptop running UCSniff with the IP Phone connection coming from the wall.
+
+There are two MitM Modes:
+1. Learning Mode
+2. Target Mode
+
+Learning Mode captures all traffic specified in the Ettercap "TARGETS" specification. The command line parameter for Learning Mode is "// //". You can customize the targets to only intercept specific IP Addresses or Networks. See the Ettercap Man page for details.
+
+For example: ucsniff -i eth0 // //
+
+In a flat network with no Voice VLANs, this command tells UCSniff to ARP Poison all hosts / all traffic on the source VLAN. Your system must have a valid IP address and correct subnet mask that would be assigned to the "eth0" interface in order for the ARP Scan to detect any valid hosts on the LAN, and for ARP Poisoning to work.
+
+When Learning Mode runs, it is using the signaling protocol (SIP, Skinny) to map extensions to IP addresses. These mappings are saved to a text file, "targets.txt", which is used for Target Mode. If the IP address for an extension changes in Learning Mode, this text file is updated.
+
+Target Mode enables Eavesdropping at a higher layer than just random audio streams or the IP address of phones for which you don't know the extension.
+
+There is only one mode in Target mode and that is targeted user:
+For example:
+ucsniff -i eth0 -T
+
+Selecting "Targeted User" tells the tool to intercept all traffic between the one Target, and the rest of the network. This signifies that all VoIP calls to/from the one target will be tracked, recorded, and saved. This sets up UCSniff to take care of the ARP Poisoning for the user so you don't have to worry about the IP address. Furthermore, if the IP Address for an extension has changed from what is contained in the Targets list, UCSniff will tell the user.
+
+One last important note: If DHCP is disabled on the VLAN and the UCSniff station IP address is set statically, make sure that you don't forget to manually set the IP Default Gateway. In MitM Mode, UCSniff will throw errors to stdout if a default gateway is not set, and UCSniff can't forward received packets to the remote IP Gateway.
+
+
+SNIFFING AND ATTACK OPTIONS: GARP DISABLEMENT AND TFTP FILE MODIFICATION
+
+Bypass of GARP Disablement
+In new installations, Cisco Unified IP Phones by default have GARP Disabled in the IP Phone settings. What this means is that when you run UCSniff in MitM mode, you can only ARP Poison the traffic from the Network to the IP Phone - you can't successfully ARP Poison the traffic from the Phone to the network. This is a useful security feature to default casual attackers, but it most definitely is not fool proof. In fact we have written a feature called GARP Disablement Bypass, which helps defeat this protection control. This is an example of how you run the feature:
+
+ucsniff -i eth0 --garpdb // //
+
+Here is how we have observed that Cisco phones implement the security feature, and how our code can defeat this feature. Normally, you can ARP Poison a device via unicast ARP reply packets and they will update their ARP cache. This also works with Cisco Unified IP Phones with the security feature turned on. However, during an active call setup with SCCP signaling, when the phone learns it's remote RTP peer via the StartMediaTransmission Skinny message, it will send an ARP request for that remote RTP peer, assuming that the peer is in the same source VLAN as the phone. So even if we have already successfully ARP Poisoned the phone, when an active call starts, the IP Phone will update it's ARP cache during call setup. So in normal operation, that is why we can't ARP Poison the phones: because they will only ARP for their remote peer during call setup, and any previously spoofed entries are overwritten. But we can defeat this now, because we have automated a way to construct spoofed unicast ARP reply packets via MitM.
+
+Winning the race condition: Since we are MitM for IP Phone traffic, we receive traffic from the network to the phone, including any traffic sent from the UCM to the IP Phone. What we do is intercept and analyze the StartMediaTransmission SCCP packet. This tells the phone the IP address and RTP port of the remote peer. Since we intercept this packet, we know the phone is about to ARP for this peer. We use information in this packet to construct a spoofed unicast ARP reply, and we start flooding the IP Phone. When the phone ARPs, we are already flooding it. When the valid IP Phone replies, we are still flooding. We keep flooding after the valid IP Phone. We win the race condition and successfully ARP Poison the phone during call setup. This method works for re-constructing bi-directional media when both phones are in the same VLAN. For calls that take place when an IP Phone is calling to/from a voice gateway in a remote VLAN, or any remote RTP peer for that matter, we can only re-construct uni-directional traffic from Network to IP phone - inbound RTP stream.
+
+One of the problems with this new UCSniff feature is that it is ineffective against intercepting any Skinny messages from the phone to the network. This is because the IP Phone ARPs for its remote IP gateway when it boots up and registers for the first time, and any subsequent spoofed ARP packets are ineffective. So we really needed to find a way to change this feature. Read below, this is what we have done.
+
+TFTP File Modification: This attack was referred to previously as TFTP MitM Modification of IP Phone settings. The feature works to change IP Phones that have GARP Disabled to Enabled. This is the CLI recommended, example usage:
+
+ucsniff -i eth0 --tftpm -T -D
+
+You first need the IP address of a target phone and build the targets.txt entry. Let's say the IP address of the phone is 172.16.87.6, here is the entire example content of targets.txt:
+
+172.16.87.6,1004,John,sccp
+
+What this attack does is target the communication from the network to this phone's IP address of 172.16.87.6. UCSniff will block any KeepAliveAck messages forwarded from the network (UCM) to the IP phone. These messages are used as a protocol heartbeat mechanism to tell the phone that it is still connected or registered to the server. Since we block these packets suddenly, after a certain number of lost heartbeats, the phone believes it has lost connectivity to the server and attempts to re-register to the call server. In this process, it will attempt to download its SEP CNF XML configuration file, which includes the full configuration that the phone needs to parse. This file is used by the Administrator to configure the phone server-side, and the phone firmware parses the file to tell itself how it needs to be configured. UCSniff sets up a UDP stream dissector which intercepts and analyzes the return traffic, looking for signs that the server is sending this SEP CNF XML configuration file over TFTP to the IP Phone. UCSniff simply looks for the GARP Disabled configuration file in the TFTP UDP streamand sets it to Enabled. When the phone finishes parsing the configuration, it now re-registers and has GARP Enabled. The only way to restore this configuration setting back is to reboot the IP Phone.
+
+This new feature can be powerful in waiting until employees go home for the evening and changing the configuration of their IP Phones, one-by-one, so that the attacker can do full eavesdropping. This research idea can be extended to change any IP Phone setting that is controlled via the SEP CNF XML file.
+
+Remove Voice Interface: To use UCSniff to remove a created virtual voice interface, run the following (assuming eth0.99 is the voice interface):
+
+ucsniff -r eth0.99
+
+
+HELP FEATURES AND DISSECTOR OVERVIEW
+
+UCSniff has three useful display options which can be found by hitting the 'h' for 'Help' within the text interface, while UCSniff is running. These options are the following:
+
+1. a: Display Directory Users from ACE functions
+2. t: Display discovered Targets
+3. y: Display active calls in progress
+4. i: Uses unicast ARP request poisoning method
+
+Unicast ARP Request Poisoning: UCSniff can use unicast ARP request poisoning threads to speed up the ARP Poisoning or to defeat IP Phones that don't update their ARP cache for traditional unicast ARP reply method. We've found that this technique is effective against Cisco 7985 Unified IP Video phones, and Avaya IP Phones.
+
+Debug Mode: Enabling UCsniff debug option can be enabled with -X or --voipdebug. This logs SIP and Skinny debug messages. If you run into problems, it would be best to turn on debug mode and send us the pcaps and logfiles to viper@viperlab.net.
+
+In order to properly handle call traffic, including logging and saving the conversation files, UCSniff depends on receiving the signaling traffic sent from the phones to the call server as well as the traffic sent from the call server to the phones. Once the phones have set up their signaling path, the RTP packes are sent directly between the Phones, usually located on the same source VLAN as the UCSniff station. UCSniff can operate perfectly if one phone is located in a remote network / VLAN. All that is required is at least one IP Phone in the source VLAN as the UCSniff station. Some IP phone models have a feature to disable Gratuitous ARP (GARP). Populating spoofed ARP entries into the ARP cache is the entire basis for MitM Mode. UCSniff has some functionality to detect if it isn't receiving traffic from one phone to the call server or between the two phones. If UCSniff detects GARP as disabled on at least one phone, it will not create the media files and save the conversation. UCSniff works by dissecting the SIP or SCCP packet, to find the RTP Port used between the phones. UCSniff then adds an RTP Dissector for the UDP port in question. When the call ends, the RTP Dissector for the UDP Port is deleted from the Dissector list.
+
+CORPORATE DIRECTORY FEATURE
+
+The VoIP corporate directory feature can be used to identify VoIP users by name. This allows Eavesdropping attacks to be carried out via name, which is preferred over just extensions. This feature currently only works in Cisco IP Phone environments. A utility called ACE (Automated Corporate Enumerator) was created that mimics the behavior of the phone (using DHCP, TFTP, HTTP), to pull down all users, in the same way that the Cisco Unified IP Phone works. These users are written to a text file, "directory-users.txt". All that is necessary is providing the MAC address of the IP Phone.
+
+ACE is a standalone utility rolled into UCSniff, but the ACE functions are included in UCSniff. To turn on the feature, you use the '-a' option and specify the MAC Address of the Cisco IP Phone. More information on ACE can be found here.
+
+For example: ucsniff -i eth0 -a -m 00:1E:F7:28:9C:8E // //
+
+This example will send a DHCP request and parse DHCP Option 150, to discover the IP Address of the TFTP Server. It then connects to the TFTP Server and downloads the configuration file specified by the MAC Address. This SEP001EF7289C8E.cnf.xml file is then parsed for the URL of the web server. This URL is used to issue HTTP GETs to fetch the VoIP Corporate Directory.
+
+In a network where DHCP is not used to pass the TFTP Server IP address via DHCP Option 150, you can specify the TFTP Server Ip address at the command line with (-t xxx.xxx.xxx.xxx), with the following:
+
+ucsniff -i eth0 -a -m 00:1E:F7:28:9C:8E -t 172.16.1001. // //
+
+VLAN HOPPING
+
+UCSniff supports automatic Voice VLAN Discovery via CDP, and VLAN Hopping. This is a very good way to run UCSniff in a CDP infrastructure. If you are running an infrastructure that uses CDP for Voice VLAN discovery, you should try to run UCSniff in CDP Spoof Mode, in the following way:
+
+ucsniff -i eth0 -c 1 // //
+
+If you know the Voice VLAN ID and want to test VLAN Hop to the Voice VLAN (Say, 200), you should try running UCSniff in the following way:
+
+ucsniff -i eth0 -v 200 // //
+
+ARP SAVER
+
+The ARP Saver utility is rolled into UCSniff and can rapidly restore the network to it's corret ARP cache entries per host, in the event that UCSniff crashes unexpectedly. If the Voice VLAN interface used by UCSniff (eth0.200, for example) crashes, ARP Saver will re-enable the interface, VLAN Hop back into Voice VLAN 200, and then re-ARP the victims. ARP Saver performs these functions by saving the interface and host entries to a text file. To restore the network, simply run 'arpsaver' in the same working diretory where UCSniff was launched from. The file 'arpsaver.txt' includes these important entries that help save the network in the event of an emergency or problem.
+
+
+VIDEO USAGE
+
+We have tested IP video eavesdropping on Ubuntu 10.10, 11.04, 12.04 (Ubuntu 3.20 only).  No special usage or flags are necessary for video eavesdropping to work. UCSniff automatically detects IP Video calls. It works great with both Cisco 7985 & 9971 IP Phones, Grandstream GXV3000 and Polycom VVX 1500C Video phones. The 'mplayer' movie player that comes pre-installed with BT3 works great to play back recorded avi files. The vlc media player also works great:
+http://www.videolan.org/vlc
+
+One item to be aware of is the default video encoding scheme as specified in the H.264 specification. Video frames are supposed to be encoded at 30 frames-per-second (fps), but not all vendors may adhere to this, and for this reason it may have an impact on the avi files output by UCSniff. UCSniff decodes at 30 fps, which is the standard. With Cisco 7985 IP Phones, they are encoded at 30 fps, so UCSniff works just fine with the displayed avi files. With Grandstream phones, we observed that they encode at 15 fps. So you have to adjust your video player to account for this encoding, so that the movie files look normal. You can do something like this with video files created by UCSniff with Grandstream GXV3000 IP Video phones:
+mplayer file.avi -fps 15
+
+If you see or learn of other IP Video phone encoding schemes that we can post here, please let us know.
+
+Customization of A/V Tools
+
+UCSniff now supports user customization of A/V tools to mix audio and video.  By changing /usr/local/etc/ucsniff.conf a user can specify the tool and command line options used to mix H264 and WAV file generated from A/V eavesdropping.
+
+The A/V command has the following structure:
+
+<A/V command> <audio input options> <input option> <audio input file> <video input options> <input option> <video input file> <video output options> <A/V output file>
+
+Using the exact parameters from the ucsniff.conf file we have:
+
+<av_command> <av_audio_in_opts> <av_input_opt> <UC Sniff audio file> <av_video_in_opts> <av_input_opt> <UC Sniff video file> <av_out_opts> <UC Sniff A/V file>
+
+
+Example configuration:
+
+av_command = "avconv";
+av_audio_in_opts = "-y -b:a 128k";
+av_input_opt = "-i";
+av_video_in_opts = "-r 6";
+av_out_opts = "-r 25 -s 352x288 -b:a 128k";
+
+Using the above configuration the following command is used to create A/V output file:
+
+avconv -y -b:a 128k -i <UC Sniff audio file> -r 6 -i <UC Sniff video file> -r 25 -s 352x288 -b:a 128k <UC Sniff A/V file>
+
+Note that UC Sniff supplies filename for the audio and video input files as well as the A/V output file.
+
+IMPORTANT NOTE:
+
+We have seen some SIP devices and SIP packets which are larger than MTU.  This causes a 'SEND L3 ERROR: ...' in ucsniff.  This issue may be overcome by installing ethtool:
+
+apt-get install ethtool
+
+Using ethtool to turn off generic and large receive offload to disable stream reassembly by the NIC:
+
+ethtool -K <interface> gro off
+ethtool -K <interface> lro off
+
+Use 'ethtool -k <interface>' to display the offload settings and confirm lro and gro are turned off.
+
+Thanks to Sam Roberts (sickmind@lavabit.com) for referring us to ethtool regarding this issue.

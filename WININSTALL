@@ -1,0 +1,180 @@
+An html version of this file is available which shows screen shots:
+http://ucsniff.sf.net/wininstall.html
+
+WINDOWS SUPPORT IN UCSNIFF
+Please note that we are no longer supporting UCSniff on Windows 3.10 and future releases, nor are we creating new binary packages for Windows UCSniff.  You can still compile UCSniff on Windows with 3.07 source, or use the unofficial binary package in 3.07 with Windows.
+
+WINDOWS FEATURE LIMITATIONS (UCSniff 3.07)
+
+UCSniff Windows has the following feature limitations that differ from the Linux OS version:
+
+    * No Audio or Video Live Monitor support
+    * No wireless eavesdropping (Well, it depends on wireless card/drivers)
+    * No G.729 or G.723 codec support
+
+UNOFFICIAL BINARY RELEASE (UCSniff 3.07)
+
+You can download the unofficial windows binaries (precompiled packages) from the downloads section of the UCSniff website, in the "UCSniff Windows" folder.
+
+    * Download the 'unofficial-precompiled-package-3.07.rar'
+    * Extract the archive file
+    * From the cmd prompt in extracted directory, issue 'ucsniff -G' in order to run UCSniff GUI
+
+We don't have any plans right now to start a Windows Installer for UCSniff GUI, but any developers are welcome to do this.
+
+BUILDING FROM SOURCE
+
+We recommend using MinGW (Minimalist GNU for Windows) /MSYS (Minimal System) for building from source. MinGW/MSYS is basically a port of GNU GCC and GNU Binutils for developing windows applications. You can find the MinGW/MYS installation instructions at http://www.mingw.org.
+
+Steps for installing MinGW:
+
+1) Use this link for downloading MinGW:
+http://www.mingw.org/wiki/HOWTO_Install_the_MinGW_GCC_Compiler_Suite
+2) We recommend using the Automated (GUI) Installer. The latest version of MinGW at the time of this writing is: MinGW-5.1.6.exe.
+3) Install MinGW to the location: C:/MinGW.
+4) Select custom installation and enable: gcc, g++, and MinGW make compilers.
+5) Download 'ucsniff-mingw-missing-files.rar' from the UCSniff download's section, in the 'UCSniff Windows' folder.
+6) un-archive it and copy the contents of include and lib directory to C:/MinGW/include and C:/MinGW/lib, respectively. These are the missing and updated library and header files of MinGW needed for building UCSniff.
+7) MinGW is installed and ready to go.
+
+Steps for installing MSYS: (Please make sure you have installed MinGW before installing MSYS)
+
+1) Follow the instructions on this link for installing MSYS:
+http://www.mingw.org/wiki/MSYS
+2) You don't have to install MSYS DTK 1.0 and MSYS Core 1.0.11.
+3) If you are planning to enable video decoding (FFMpeg) support in UCSniff, then download coreutils-5.97 for MSYS from:
+http://prdownloads.sourceforge.net/mingw/coreutils-5.97-MSYS-1.0.11-snapshot.tar.bz2?download
+4) Unpack the contents of the file and copy pr.exe to C:\msys\1.0\bin. You just need pr.exe for FFMpeg.
+5) MSYS is installed and ready to go.
+
+UCSniff depends on other libraries as well. There are two ways for downloading the UCSniff dependency packages.
+
+1) The Easy Way: to get all the dependency packages used by the UCSniff developers from the UCSniff downloads section, 'UCSniff Windows' folder. These may not be the latest packages.
+OR
+2) The Harder Way:You can download each dependency from their respective websites and build them on your own. You may have to play around with the UCSniff mingw makefile if any of the shared library's filenames have changed.
+
+The Easy Way:
+
+We have uploaded all the dependency libraries and header files into the archive file, 'unofficial-dependencies.rar.' You can download it from the "UCSniff Windows" folder located in the download section.
+
+1) Install winpcap libraries - install the drivers (version >= 3.1 beta)
+2) Create a folder: ucsniff-windows-dev
+3) Unarchive the contents of unofficial-dependencies.rar inside the ucsniff-windows-dev
+4) Download ucsniff-x.xx.tar.gz
+5) un-archive it inside 'ucsniff-windows-dev'
+6) cd ucsniff-x.xx
+7) ./configure
+8) make
+9) Important: make sure ucsniff.exe and share (directory of ucsniff) are in the same path. You may have to copy all the dll's from each dependency lib folder and place it in a path accessible by the exe.
+
+PS: If you are receiving errors like "Segmentation Fault" or "Stacked Overflowed" while running configure or make script:
+Please kill the Logitec WebCam and its process (lvprcsrv.exe).
+
+(Some of the below instructions are from ettercap readme.platforms file, thanks to G. Vanem and ettercap)
+
+The Harder Way:
+
+1) download the wpdpack from the winpcap website
+- install the drivers (version >= 3.1 beta)
+2) download the libnet tarball from packetfactory.net
+apply this patch:
+http://ettercap.sf.net/devel/libnet-1.1.2.1-mingw.tar.gz
+3) download pthreads from: ftp://sources.redhat.com/pub/pthreads-win32
+- Download the prebuilt-dll release and rename it to pthreads
+4) download all the other required libraries from:
+http://gnuwin32.sourceforge.net/packages.html
+- libgw32c
+- libz
+- libregex
+- libiconv
+5) Download juce libraries from the UCSniff downloads, "UCSniff Windows" section: jucelib.rar.
+
+(OPTIONAL): Download ffmpeg libraries for video decoding (avi format for video files and muxing video and audio). You have to build the FFMpeg DLLs dynamically. The link below also has instructions for setting up MinGW/MSYS and building FFMpeg DLLs:
+http://ffmpeg.arrozcru.org/wiki/index.php?title=Main_Page
+http://ffmpeg.arrozcru.org/wiki/index.php?title=Shared
+
+Enabling video decoding support on windows:
+
+After successfully building ffmpeg DLLs, go to the UCSniff directory. Edit Makefile.mingw.in and set the USE_FFMPEG variable to 1. This compiles UCSniff with FFMpeg support.
+
+6) unpack all of the packages as shown in the following tree:
+|-> ucsniff-x.xx
+|-> gw32c
+|-> libiconv
+|-> libnet
+|-> pthreads
+|-> regex
+|-> winpcap
+|-> zlib
+|-> jucelib
+|-> ffmpeg (Optional: needed for video decoding)
+
+Make sure each directory (except the 'jucelib' directory) contains an 'include' dir with the .h files and a 'lib' directory with the .a/.dll files.
+7) cd ucsniff-x.xx
+8) ./configure
+9) make
+10) Important: make sure ucsniff.exe and share (directory of ucsniff) are in the same path. You may have to copy all the DLLs from each dependency lib folder and place it in an accessible path.
+
+PS: If you are getting errors like "Segmentation Fault" or "Stacked Overflowed" while running the configure or make script: Please kill the Logitec WebCam and its process (lvprcsrv.exe).
+
+Windows UCSniff Usage:
+
+Open cmd prompt and type:
+
+"ucsniff -G" to launch the GUI. (We recommend using the GUI, because the text interface doesn't work very well on windows command prompt)
+
+VLAN Hopping and creating a virtual interface tagged with 802.1Q on windows:
+
+For creating a virtual Voice VLAN interface on Windows, you need the Ndis protocol and Mux IM (Intermediate) drivers. You can download both of these drivers from the downloads section. We compiled these drivers by modifying some simple changes to the driver configuration samples found in WinDDK.
+
+UCSniff uses the Ndisprot driver interface for setting the 802.1Q tag (vlan id) on the selected network interface.
+
+The Mux IM driver creates virtual interfaces for each network interfaces available (i.e. for both the wired and wireless interfaces). Actually the Mux-IM driver is optional. You could use your current network interface and tag it with the vlan id using Ndisprot and get access to the voice vlan, but you can't untag the vlan id using ucsniff. So it is better to create a virtual interface using the mux drivers and tag the virtual interface with the voice vlan id. This way you will have simultaneous access to both the data and voice network. Data network access via the native network interface and voice network access via the virtual network interface.
+
+We use ProtInstall tool for programmatically installing Ndisprot service, you can get the source code from:
+http://www.ndis.com/ndis-general/ndisinstall/programinstall.htm.
+
+The WinVLAN package just has the ProtInstall binary.
+
+Installing the drivers:
+
+1) Download 'WinVlan.rar' from the UCSniff downloads section, 'UCsniff Windows' folder
+2) Unpack the contents
+3) Open cmd prompt and navigate to WinVlan/
+
+Installing Ndis protocol driver:
+4) Execute the following from cmd:
+protinstall.exe /install ndisprot
+(This will install and start the ndisprot network service)
+
+Installing Mux IM driver:
+5) Follow the below directions for installing mux IM driver
+
+Right click you network interface connection and click on properties.
+
+Click on Install.
+
+Select protocol and then Add.
+
+Select "Have Disk".
+
+Browse to the path where the downloaded WinVLAN drivers are located and then select the "muxp.inf" file.
+
+Once the installation of Mux IM driver begins, you will see a warning screen several times. Select "Continue Anyway."
+
+After successful installation of the Mux and Ndis drivers, your network connection property menu will show the two new drivers.
+
+Verify that you have the "Sample Mux-IM Protocol Driver" and "Sample NDIS Protocol Driver." Also make sure you have the virtual interfaces for the wired and wireless network connections. You should see new connectoids in your Network Connections, as shown below:
+
+6) Important: Reboot your system after installing the mux IM driver.
+7) Important: To start the ndisprot service after each reboot, issue "net start ndisprot" at the cmd prompt (shown below). Alternatively, add it to the boot script of windows.
+
+Uninstalling mux driver:
+
+Go to the network connection properties and select "Sample Mux-IM Protocol Driver" and click on "Uninstall".
+
+Select "Yes."
+
+Uninstalling NDIS Protocol driver:
+
+Type "protinstall.exe /uninstall ndisprot" at the command prompt. 

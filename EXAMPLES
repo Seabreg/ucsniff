@@ -1,0 +1,56 @@
+Here are some basic and clever examples of how to use UCSniff.
+
+Cisco
+In a Cisco IP Phone infrastructure, do the following:
+1.  Locate an IP Phone
+2.  Replace Ethernet from phone to wall jack with laptop running UCSniff 
+3.  Take note of MAC Address on phone
+4.  Run UCSniff to see if Voice VLANs are enabled:
+
+ucsniff -i eth0 -c 1 // //
+
+If the CDP spoofed message times out, Voice VLANs are not used.  In this case, you want to run UCSniff on a flat network with dedicated access ports serving the IP Phones:
+
+ucsniff -i eth0 // //
+
+If Voice VLANs are used, UCSniff will automatically (and immediately) Hop into the Voice VLAN and do it's work.
+
+You can check on the LCD screen interface of the IP Phone to see if the "Corporate Directory" feature is enabled.
+
+If it is, all you need to do is supply the MAC Adress of the IP Phone and UCSniff will load the entries automatically.
+
+Try this:
+ucsniff -i eth0 -c 1 -a -m 00:00:00:00:00:00 // //
+
+Remote Eavesdropping
+You could set up two physical ethernet interfaces on a station running UCSniff.  The 1st interface could be used for remote management.  The second interface could be used for UCSniff fun activities.
+
+Another way that I use UCSniff all of the time is in a Cisco infrastructure, with VLAN Hopping.  You can SSH to the laptop running UCSniff and listening on the eth0 interface.  You then run UCSniff, 'ucsniff -i eth0 -c 1 // //', and after it hops into the Voice VLAN (200, for example), UCSniff listens for voice traffic on eth0.200, while the SSH session is forwarded over eth0 (the data / access VLAN).
+
+
+Fun with Targets
+Currently, the Corporate Directory tool only supports Cisco directories, and the targets file entries are based in part on directory entries; however, there are many fun possibilities for using the targets.txt file in creative ways.  Directory entries are less likely to change for an extension than are the IP addresses for an IP Phone that is mapped to an extension.  In UCSniff Learning Mode, targets are still mapped to the 'targets.txt' file independent of a directory entry.  Therefore, you can create your own targets.txt file!
+
+If you are a pentester (or whoever you are ;-) ), you can use the same method that an internal user follows to find an extension.  People don't call random numbers until they get the person they are trying to reach.  They either have a utility in the phone, a corporate Intranet lookup web application, or something printed up in hard copy to lookup users.  Whatever the method, the pentester just uses the same method.  If you don't know, you simply play dumb and ask an internal user.  You can then import these entries into targets.txt, or manually edit the file.  
+
+When you run the tool in learning Mode, you'll see the format of the extensions as decoded in the SIP URI.  These entries will be mapped into targets.txt.
+
+Then you can run the tool in Target Mode to *target* specific users.
+
+The format of the targets.txt file is:
+IP,extension,name,protocol
+
+So you can use your imagination on how to use this file, it has some great possibilities for fun.  Here are two sample entries:
+
+bt src#cat targets.txt
+172.16.96.18,1004,John (CEO) Rodgers,sccp
+172.16.96.12,1090,Eric Winsborrow,sccp
+bt src#
+
+VMWare
+UCSniff runs just fine in VMWare, but I have never been able to get the VLAN Hopping support to work through a Windows Host OS VMWare Instance.  This is likely because although Windows does support 802.1q VLAN Tagging, you have to use a special driver or tool.  Please let me know if anyone figures out how to use UCSniff VLAN Hopping through VMWare.
+
+ 
+
+
+

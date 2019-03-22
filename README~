@@ -1,0 +1,147 @@
+WHAT IS UCSNIFF?
+UCSniff  is a VoIP/UC Sniffer / Assessment / Pentest tool with some useful new features, such as IP Video Sniffing. UCSniff is a Proof of Concept tool to demonstrate the risk of unauthorized recording of VoIP and Video - it can help you understand who can eavesdrop, and from what parts of your network. It is intended for next generation enterprise VoIP/UC Infrastructures that rely on Voice VLANs to segment UC applications for QoS requirements. UCSniff was born from pentesting and the "VoIP Hopper" tool as an idea to combine automated Voice VLAN Discovery and VLAN Hop with MitM, along with targeted VoIP attacks against users in the VoIP Corporate Directory. Eavesdropping is one of many potential UC-specific attacks that can take place, and UCSniff can be used by other researchers and security professionals as a base tool to explore this idea. UCSniff is a text and GUI application, written in C/C++, that runs in the Linux and Windows OS environment. It is freely available under the GPLv3 license for anyone to download and use.
+
+FEATURE LIST
+    * UC Sniffer with VoIP and IP Video Support
+    * Realtime Video and VoIP Monitor (SIP)
+    * Automated Voice VLAN Discovery (CDP)
+    * VLAN Hop Support
+    * Sniffing across Ethernet Switches
+    * Automatic creation of forward and reverse RTP audio streams into a single wav file
+    * Automatic creation of two avi files (forward and reverse video) for H.264 Video codec
+    * Automatic recording and saving of conversations using G.711 u-law and a-law codec
+    * Automatic recording and saving of conversations using G.722, G.729, G.726, G.723 and WebRTC iSAC codecs (Note:  G.729, G.723, G.726 codecs only work with a 32-bit Linux OS)
+    * MitM ARP Poisoning and host management support
+    * Monitor Mode (Span Session, Hub)
+    * Tracking and tracing of users, with logging
+    * Support for Cisco SIP, Cisco Skinny, RFC 3261 SIP
+    * Support for Cisco UCM 6.1, 7.0, 7.1 and 8.02
+    * Target Mode (Target User)
+    * Corporate Directory Tool and functions (ACE)
+    * ARP Saver Tool to restore network in emergencies
+    * Gratuitous ARP Disablement Bypass
+    * TFTP MitM Modification of IP Phone Settings
+    * GUI Support in Windows and Linux
+    * GUI Skin or Theme selection
+    * Only requires 1 phone (not both) in source VLAN in order to capture entire conversation
+    * New VideoSnarf tool outputs media files (audio, video) from pcap
+    * Sniffing and logging of Microsoft OCS IM Conversations
+    * Support for eavesdropping on Avaya SIP, Avaya H.323 media re-construction
+    * Ability to enable/disable audio/video file mixing via checkbox in GUI
+    * Support for user specified command to mix audio and video files
+
+WINDOWS FEATURE LIMITATIONS
+Please note that Windows UCSniff is limited on the following features and that, as of UCSniff 3.10, Windows is no longer supported.
+* No Audio or Video Live Monitor support
+* No wireless eavesdropping (Depends on wireless card/drivers)
+* No G.729 or G.723 support
+
+WHY?
+To understand risk, in order to mitigate. UCSniff is intended to help understand the risk of VoIP Eavesdropping so that security in the VoIP Infrastructure and applications can be improved to a level of acceptable risk. VoIP exists on the network like any other TCP/IP client-server application (yet with special QoS requirements), and VoIP owners should apply similar best practices. VoIP offers tremendous cost-saving potential, and it actually can be made "secure" to the acceptable risk tolerance level.
+
+NEW DEVELOPMENTS IN UCSNIFF 3.20:
+* Added support for Ubuntu 12.04
+* Realtime Video monitoring using latest libvlc library (2.0.1 - Twoflower)
+* Support for iSAC audio codec from Google's WebRTC
+* Added support for Cisco 9971 video phone eavesdropping
+* Lets users specify tool and options for mixing audio (WAV) and video (H264) files
+* Decoupled dependency on older FFMPpeg code so future updates to FFMPeg (now libav) and libvlc won't break UCSniff
+* Support for Cisco UCM 8.0.2 Skinny (SCCP)
+* Decoupled dependency on Ettercap's 'etter.conf'.  UCSniff now uses it's own configuration file, 'ucsniff.conf'
+* Enhanced default Juce interface GUI bug with random colors
+* Ability to enable/disable audio/video file mixing via checkbox in GUI
+* Support for user specified command to mix audio and video files
+* Builds (but no tested) in Mint Linux 13
+
+NEW AUDIO/VIDEO FILE MIXING SUPPORT
+
+Correctly mixing audio (WAV) and video (H264) files such that audio and video are synchronized is a challenge.  To this end, 2 new features regarding audio and video file mixing have been added:  1) the ability to disable (default) or enable audio/video mixing via checkbox on the UCSniff GUI, and 2) the capability of UCSniff to use a user specified command and options to mix audio and video files created by UC Sniff.  This capability is accomplished via user configuration of ucsniff.conf.  See the USAGE file for more details.
+
+NEW DEVELOPMENTS IN UCSNIFF 3.10:
+* New GUI look and improvements, including Skin or Theme selection 
+* Simplified installation instructions
+* Vastly improved speed and consistency of Realtime Video Monitor feature
+* Realtime Video monitoring using latest libvlc library (1.1.x)
+* Added support for Ubuntu 10.10 and 11.04
+* Realtime Audio Monitoring using ALSA library, as OSS (Open Sound System) is deprecated in Linux kernel 2.5 and later
+* Created static library for FFMpeg and x264, and statically linked UCSniff to this library, making configuration easier
+* Creating avi files for video calls doesn't require special configuration or installation of ffmpeg/x264 library
+
+FEATURES NEW IN UCSNIFF 3.0 (Release Date:  10/24/09):
+
+IP VIDEO SUPPORT
+UCSniff is the first ever IP Video Sniffer to be released under the GPL (and possibly the first IP Video Sniffer). It is the first security assessment tool to implement features that allow the testing for unauthorized eavesdropping on private IP video calls. UCSniff video support works very similar to regular VoIP conversation eavesdropping. After the signaling protocol is dissected (SIP, SCCP), the RTP ports used for H.264 video are dynamically added to the video decoder. When the call ends, UCSniff automatically outputs two avi files. One file is the reconstructed video seen by the calling video user; the other file is the recontructed video seen by the called video user. Both avi files contain the one-way audio experienced by the end user. Then, the entire 2-way audio conversation is recontructed into a single wav file. 
+
+
+REALTIME VIDEO & AUDIO MONITOR
+UCSniff is the first ever security tool to do realtime monitoring of IP Video calls. UCSniff supports this exciting new feature, which allows a security professional to test for the ability of an insider to eavesdrop on a private IP video call and hear both audio and video while the call is in progress. Currently the feature only works with SIP, and it is only supported on the Linux platform.
+
+
+GUI
+UCSniff now has GUI support in both Windows and Linux OS environments. The GUI is built upon the Juce Libraries, and it makes running UCSniff even easier than before. Take a look at some of the screen shots of UCSniff GUI in action.
+
+
+WINDOWS PORT 
+We have a Windows port of the UCSniff code now. UCSniff Windows is available as binary release or source code. See the installation instructions for Windows for more information.  Please note that Windows UCSniff is limited on the following features:
+* No Audio or Video Live Monitor support
+* No wireless eavesdropping (Depends on wireless card/drivers)
+* No G.729 or G.723 codec support
+
+
+GRATUITOUS ARP DISABLEMENT BYPASS
+We have developed a new feature in UCSniff to help defeat the new GARP Disabled security feature which is configured by default in some new VoIP environments. The security feature itself means that the IP Phone will not populate its ARP cache when Gratuitous ARP (reply) packets are sent by an attacker sourced from the same VLAN towards the IP Phone. So this security feature helps prevent successful ARP Poisoning. What this new feature does is help defeat the "GARP Disabled" security feature. It does this by intercepting traffic from the network to the phone, and winning the race condition for when the IP Phone will ARP for the remote RTP peer (remote IP Phone). This feature works perfectly when both phones are in the same VLAN. However, when 1 IP phone or RTP peer is in a remote VLAN, it will not work and you can only receive the RTP stream from network to phone. See the USAGE file/link for more information on how to use this nice feature.
+
+
+TFTP MITM MODIFICATION OF IP PHONE SETTINGS
+Originally presented and announced at DefCon 17 conference, UCSniff 3.0 now supports a nice new feature in which you can modify IP Phone settings in Cisco Unified IP Phone environments. This feature currently enables GARP if GARP is in fact disabled, but the parameters that can be changed are within your imagination of what is contained in the SEP CNF xml file. See the USAGE link/file for more information on how to use this new feature.
+
+
+NEW TOOL: VIDEOSNARF
+VideoSnarf is a new tool first released with UCSniff 3.0. Presented for the first time at DefCon 17, this tool takes an offline pcap as input and outputs all detected media streams, including first of its kind support for decoding H.264 RTP Video streams. This tool is good for pentesters that want to use other tools like tshark/wireshark and ettercap to capture VoIP/Video traffic but want to decode these streams. VideoSnarf supports G711ulaw, G722, G729, G723, and G726 codecs. See the VideoSnarf page for more details here.
+http://ucsniff.sf.net/videosnarf.html
+
+TESTED PLATFORMS, SOFTWARE, PROTOCOLS
+
+Development and testing OS for UCSniff is Ubuntu 10.10, 11.04 and 12.04 (UCSniff 3.2 only supports Ubuntu 12.04)
+UCSniff was intended for Ubuntu Linux, but it should compile and run on other platforms as well.
+
+Tested Call Servers:
+Cisco UCM 6.1 (SIP, Skinny)
+Cisco UCM 7.0, 7.1(3), 8.0.2 (Skinny)
+Cisco CCM 4.1 (Skinny)
+Asterisk SIP
+Avaya Communication Manager (SIP)
+SIPfoundry sipXecs 4.1.x
+
+Tested IP Phones:
+Cisco Unified IP Phone (7971G-GE, 7961G-GE, 7941G-GE, 7945G, 7942G)
+Cisco 7940, Cisco 7971
+Avaya 9620, 9630
+Snom 320, Snom 200
+
+Tested IP Video Phones:
+Cisco 
+Cisco Unifed IP Phone 7985G
+Cisco Unified IP Endpoint 9971
+Polycom Soundpoint VVX 1500C (Realtime Video Monitor works)
+Grandstream GXV3000 (Realtime Video Monitor works)
+Ekiga SIP Client
+Counterpath Eyebeam and Bria SIP Client configured for H.264 Codec
+
+Tested OS Environment:
+Ubuntu 12.04 (UCSniff 3.20 only)
+
+USAGE
+See the USAGE file/link for a detailed description of how to use UCSniff.
+
+CREDITS
+All Ettercap authors and contributors
+IMTelephone ~ http://www.imtelephone.com
+VLC Authors ~ http://www.videolan.org/vlc
+All authors and contributors of SoX (Sound eXchange)
+Evin Hernandez, for testing feedback
+Julian Storer (JUCE Library Author)
+Steve Underwood - SpanDSP (DSP components for telephony/G.722 decoder)
+FFmpeg Authors
+VoIP Hopper credits
+Sam Roberts, for advice about using ethtool to resolve our SEND L3 ERROR issue

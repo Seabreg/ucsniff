@@ -1,0 +1,81 @@
+UCSniff
+
+version:  3.20
+Date:  6/8/12
+
+BUGS and WARNINGS:
+
+[ Cisco 7985 phone issues ]
+
+1) The live monitor windows can take a long time (sometimes minutes) to appear.  Numerous H264 errors are seen from libvlc, but eventually the live monitor windows come up.  Since the Cisco 7985 are end-of-life, it is doubtful we will be addressing this issue.
+2) Sometimes there's a blurb of static noise at the end of the call.  This issue is intermittent and appears to happen most when the caller is in a different VLAN.  This static noise is not heard in the WAV file generated.
+
+[ Live monitor issues ]
+
+3) Sometimes blurbs of static noise can be heard during a live monitor session of a call.  However, this noise cannot be heard in the WAV file.  Since we are playing the same decoded buffer as what is being writting to the WAV file, we are not yet sure why this is happening.
+4) avconv dies when trying to mux H264 and audio files.  It complains that there is a change of resolution in the H264 file.  This causes UCSniff to exit (not crash) abruptly.
+
+FIXES:
+1) Support for Realtime Video Monitoring in latest libvlc library (2.0.1 - Twoflower).
+2) Support for libav (was FFMpeg) with version 0.8.1.  libvlc uses libav and needs the 0.8.1 version to work properly.  UCSniff had previously included FFMpeg code to mix audio (WAV) and video (H264) files.  However, this older version of FFMpeg proved to be incompatible libvlc and the latest version of FFMpeg (now libav) broke existing code in UCSniff.  This release of UCSniff breaks the code level dependency with FFMpeg.  UCSniff no longer builds FFMpeg/libav libraries and uses what has been installed by the user.
+3) Support for iSAC audio codec from Google's WebRTC.
+4) Added support for Cisco 9971 video phone eavesdropping
+5) Resolved issue with Cisco 9971 phones causing 'SEND L3 ERROR' by using ethtool to turn off generic and receiver offload support (see USAGE for further details).  Thanks to sickmind@lavabit.com (Sam Roberts) for referring us to the ethtool.
+6) Added Realtime A/V monitoring support for Cisco Skinny (works with Cisco 7985 and Cisco 7971).
+7) Added support to improve eavesdropping and live monitoring when caller/called are in different VLANs.
+8) Fixed issue with incorrect WAV header causing some players to not play entire WAV file.
+9) Decoupled dependency on Ettercap's 'etter.conf'.  UCSniff now uses it's own configuration file, 'ucsniff.conf'.
+10) Ability to enable/disable audio/video file mixing via checkbox in GUI.
+11) Support for user specified command to mix audio and video files.
+
+version:  3.10
+Date:  6/3/11
+
+BUGS and WARNINGS:
+We have not tested any bugs or warnings from the previous versions of UCSniff.  We will be working on it soon.
+
+FIXES:
+1) Support for Realtime Video Monitoring in latest libvlc library (1.1.x or later)
+2) Added support for Ubuntu 10.10 and 11.04
+3) Support for Realtime Audio Monitoring with ALSA library as latest Ubuntu versions no longer support OSS
+4) Added static library for ffmpeg and x264, making configuration easier
+
+version:  3.08
+Date:  5/18/10
+
+BUGS:
+
+[ Most of the bugs are related to video live monitoring feature ]
+
+1) libvlc handle doesn't get released while stopping ucsniff, it happens randomly. UCSniff re-arp's the network and gets stuck while releasing the libvlc handler. User has to kill the program to terminate.
+2) video live monitoring doesn't work properly when the H264 fps is greater than 25. UCSniff(libvlc) crashes with H264 fps > 25, it happens rarely though. 
+3) Arp poisoining doesn't work on windows wireless interface. Mostly because windows interface drivers don't support promiscuous mode.
+4) G723 and G729 codec windows static libraries doesn't get linked.
+5) Live monitoring(both audio and video) works only on Linux. [ Not planning to add windows live monitoring feature in the near future].
+6) Live monitoring feature works only for SIP calls. Next release may have live monitoring feature for SCCP(Skinny) protocol.
+7) Media files listed on the "Media files" GUI tab cannot be played on linux. [ Works on windows]. Some issue with juce libraries.
+8) validating IP address while parsing targets.txt works only on Linux. 
+9) Skinny(SCCP) video eavesdropping doesn't work on 64-bit.
+10) Rarely the first instance of libvlc crashes with seg fault. Error looks like this, "vcdx access error : file logging.c". 
+11) live video monitoring doesn't terminate properly on ubuntu-9.10
+
+Warning:
+
+1) G726 codec support not tested.
+2) G723 and G726 codec support not added for SCCP(Cisco Skinny), because no cisco IP phone supports G723/G726. If you know any Cisco IP phone with G723/G726 please let us know. we will add the G723/G726 support.
+3) G729/G726/G723 not supported on 64-bit OS, because the codec binaries are 32-bit. You can create a 32-bit ucsniff binary on your 64-bit. The procedure will be somewhat like this, we haven't done this yet.
+export CPPFLAGS = -m32
+export CFLAGS = -m32
+export LDFLAGS = -m32
+./configure --host=i386-linux-gnu
+make
+you have to install all the 32-bit dependency libraries and link it. Thanks to Mike Cooper for giving us some insights on this.
+
+Fixes:
+
+1) Added SCCP mutual exclusion.
+2) Added support for Ubuntu-9.10
+3) Removed ALSA support from JUCE libraries
+4) Fixed cdp sniff mode bugs for vlan hopping
+5) Fixed ffmpeg and libvlc linking issue. Resolved when libx264 is compiled from source.
+6) ACE module http request for default 80 if no port found in directory url of sep cnf file.
